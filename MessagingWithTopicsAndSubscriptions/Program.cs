@@ -9,7 +9,9 @@
 
     public class program
     {
-        private static string TopicName = "SampleQueue";
+        private static string TopicName = "SampleTopic";
+        private static string SubscriptionName1 = "SubscriptionName1";
+        private static string SubscriptionName2 = "SubscriptionName2";
         private static MessagingFactory messagingFactory = MessagingFactory.Create();
         const Int16 maxTrials = 4;
 
@@ -33,20 +35,22 @@
         {
             NamespaceManager namespaceManager = NamespaceManager.Create();
 
-            Console.WriteLine("\nCreating Queue '{0}'...", TopicName);
+            Console.WriteLine("\nCreating Topic '{0}'...", TopicName);
 
             // Delete if exists
             if (namespaceManager.TopicExists(TopicName))
             {
-                namespaceManager.DeleteQueue(TopicName);
+                namespaceManager.DeleteTopic(TopicName);
             }
 
-            namespaceManager.CreateQueue(TopicName);
+            var topicDesc = namespaceManager.CreateTopic(TopicName);
+            namespaceManager.CreateSubscription(topicDesc.Path, SubscriptionName1);
+            namespaceManager.CreateSubscription(topicDesc.Path, SubscriptionName2);
         }
 
         private static void SendMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(TopicName);
+            var topicClient = messagingFactory.CreateTopicClient(TopicName);
 
             List<BrokeredMessage> messageList = new List<BrokeredMessage>();
 
@@ -54,7 +58,7 @@
             messageList.Add(CreateSampleMessage("2.2.2", "Second message information"));
             messageList.Add(CreateSampleMessage("3.3.3", "Third message information"));
 
-            Console.WriteLine("\nSending messages to Queue...");
+            Console.WriteLine("\nSending messages to Topic...");
 
             foreach (BrokeredMessage message in messageList)
             {
@@ -62,7 +66,7 @@
                 {
                     try
                     {
-                        queueClient.Send(message);
+                        topicClient.Send(message);
                     }
                     catch (MessagingException e)
                     {
@@ -81,21 +85,21 @@
                 }
             }
 
-            queueClient.Close();
+            topicClient.Close();
         }
 
         private static void ReceiveMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(TopicName);
+            var subscriptionClient = messagingFactory.CreateSubscriptionClient(TopicName, SubscriptionName1);
 
-            Console.WriteLine("\nReceiving message from Queue...");
+            Console.WriteLine("\nReceiving message from Subscription...");
             BrokeredMessage message = null;
             while (true)
             {
                 try
                 {
                     //receive messages from Queue
-                    message = queueClient.Receive(TimeSpan.FromSeconds(5));
+                    message = subscriptionClient.Receive(TimeSpan.FromSeconds(5));
                     if (message != null)
                     {
                         Console.WriteLine(string.Format("Message received: Id = {0}, Body = {1}", message.MessageId, message.GetBody<Version>()));
@@ -121,7 +125,7 @@
                     }
                 }
             }
-            queueClient.Close();
+            subscriptionClient.Close();
         }
 
         private static BrokeredMessage CreateSampleMessage(string messageId, string messageBody)

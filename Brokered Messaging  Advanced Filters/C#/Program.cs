@@ -8,14 +8,13 @@ using Microsoft.ServiceBus;
 using Microsoft.ServiceBus.Messaging;
 using Microsoft.ServiceBus.Description;
 using Microsoft.ServiceBus.Messaging.Filters;
+using AdvancedFiltersSample;
 
 namespace Microsoft.Samples.AdvancedFiltersSample
 {
     class Program
     {
         #region Fields
-        static string ServiceBusConnectionString;
-
         const string TopicName = "MyTopic";
         const string SubsNameAllMessages = "AllOrders";
         const string SubsNameColorBlueSize10Orders = "ColorBlueSize10Orders";
@@ -28,18 +27,15 @@ namespace Microsoft.Samples.AdvancedFiltersSample
             // This sample demonstrates how to use advanced filters with ServiceBus topics and subscriptions.
             // The sample creates a topic and 3 subscriptions with different filter definitions.
             // Each receiver will receive matching messages depending on the filter associated with a subscription.
-            // ***************************************************************************************
-
-            // Get ServiceBus namespace and credentials from the user.
-            Program.GetNamespaceAndCredentials();
+            // ***************************************************************************************            
 
             // Create messaging factory and ServiceBus namespace client.
-            MessagingFactory messagingFactory = Program.CreateMessagingFactory();
-            NamespaceManager namespaceManager = Program.CreateNamespaceManager();
+            MessagingFactory messagingFactory = MessagingFactory.Create();
+            NamespaceManager namespaceManager = NamespaceManager.Create();
 
             // Delete the topic from last run.
             Program.DeleteTopicsAndSubscriptions(namespaceManager);
-            
+
             // Create topic and subscriptions that'll be using through the sample.
             Program.CreateTopicsAndSubscriptions(namespaceManager);
 
@@ -111,7 +107,7 @@ namespace Microsoft.Samples.AdvancedFiltersSample
             int receivedMessages = 0;
 
             // Create subscription client.
-            SubscriptionClient subsClient = 
+            SubscriptionClient subsClient =
                 messagingFactory.CreateSubscriptionClient(Program.TopicName, subsName, ReceiveMode.ReceiveAndDelete);
 
             // Create a receiver from the subscription client and receive all messages.
@@ -154,6 +150,10 @@ namespace Microsoft.Samples.AdvancedFiltersSample
             namespaceManager.CreateSubscription(topicDescription.Path, SubsNameColorBlueSize10Orders, new SqlFilter("color = 'blue' AND quantity = 10"));
             Console.WriteLine("Subscription {0} added with filter definition \"color = 'blue' AND quantity = 10\".", Program.SubsNameColorBlueSize10Orders);
 
+            //var ruleDesc = new RuleDescription();
+            //ruleDesc.Filter = new CorrelationFilter("high");
+            //ruleDesc.Action = new SbAction();
+
             // Create a subscription that'll receive all high priority orders.
             namespaceManager.CreateSubscription(topicDescription.Path, SubsNameHighPriorityOrders, new CorrelationFilter("high"));
             Console.WriteLine("Subscription {0} added with correlation filter definition \"high\".", Program.SubsNameHighPriorityOrders);
@@ -175,32 +175,6 @@ namespace Microsoft.Samples.AdvancedFiltersSample
             }
 
             Console.WriteLine("Delete completed.");
-        }
-
-        static NamespaceManager CreateNamespaceManager()
-        {
-            return NamespaceManager.CreateFromConnectionString(ServiceBusConnectionString);
-        }
-
-        static MessagingFactory CreateMessagingFactory()
-        {
-             return MessagingFactory.CreateFromConnectionString(ServiceBusConnectionString);
-        }
-
-        static void GetNamespaceAndCredentials()
-        {
-            Console.Write("Please provide a connection string to Service Bus (/? for help):\n ");
-            Program.ServiceBusConnectionString = Console.ReadLine();
-
-            if ((String.Compare(Program.ServiceBusConnectionString, "/?") == 0) || (Program.ServiceBusConnectionString.Length == 0))
-            {
-                Console.Write("To connect to the Service Bus cloud service, go to the Windows Azure portal and select 'View Connection String'.\n");
-                Console.Write("To connect to the Service Bus for Windows Server, use the get-sbClientConfiguration PowerShell cmdlet.\n\n");
-                Console.Write("A Service Bus connection string has the following format: \nEndpoint=sb://<namespace>.servicebus.windows.net/;SharedSecretIssuer=<issuer>;SharedSecretValue=<secret>\n");
-
-                Program.ServiceBusConnectionString = Console.ReadLine();
-                Environment.Exit(0);
-            }
         }
 
         #endregion
