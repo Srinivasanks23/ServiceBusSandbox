@@ -9,7 +9,7 @@
 
     public class program
     {
-        private static string QueueName = "SampleQueue";
+        private static string TopicName = "SampleQueue";
         private static MessagingFactory messagingFactory = MessagingFactory.Create();
         const Int16 maxTrials = 4;
 
@@ -18,7 +18,7 @@
             // Please see http://go.microsoft.com/fwlink/?LinkID=249089 for getting Service Bus connection string and adding to app.config
 
             Console.WriteLine("Creating a Queue");
-            CreateQueue();
+            CreateTopic();
             Console.WriteLine("Press anykey to start sending messages ...");
             Console.ReadKey();
             SendMessages();
@@ -29,24 +29,24 @@
             Console.ReadKey();
         }
 
-        private static void CreateQueue()
+        private static void CreateTopic()
         {
             NamespaceManager namespaceManager = NamespaceManager.Create();
 
-            Console.WriteLine("\nCreating Queue '{0}'...", QueueName);
+            Console.WriteLine("\nCreating Queue '{0}'...", TopicName);
 
             // Delete if exists
-            if (namespaceManager.QueueExists(QueueName))
+            if (namespaceManager.TopicExists(TopicName))
             {
-                namespaceManager.DeleteQueue(QueueName);
+                namespaceManager.DeleteQueue(TopicName);
             }
 
-            namespaceManager.CreateQueue(QueueName);
+            namespaceManager.CreateQueue(TopicName);
         }
 
         private static void SendMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(QueueName);
+            var queueClient = messagingFactory.CreateQueueClient(TopicName);
 
             List<BrokeredMessage> messageList = new List<BrokeredMessage>();
 
@@ -86,7 +86,7 @@
 
         private static void ReceiveMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(QueueName);
+            var queueClient = messagingFactory.CreateQueueClient(TopicName);
 
             Console.WriteLine("\nReceiving message from Queue...");
             BrokeredMessage message = null;
