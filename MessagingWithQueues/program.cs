@@ -18,6 +18,7 @@ namespace Microsoft.Samples.MessagingWithQueues
     using Microsoft.ServiceBus.Messaging;
     using System.Configuration;
     using System.Threading;
+    using System.Security.Principal;
 
     public class program
     {
@@ -27,6 +28,8 @@ namespace Microsoft.Samples.MessagingWithQueues
 
         static void Main(string[] args)
         {
+            AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
+
             // Please see http://go.microsoft.com/fwlink/?LinkID=249089 for getting Service Bus connection string and adding to app.config
 
             Console.WriteLine("Creating a Queue");

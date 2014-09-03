@@ -9,5 +9,6 @@ namespace AdvancedFiltersSample
 {
     public class SbAction
     {
+        
     }
 }
