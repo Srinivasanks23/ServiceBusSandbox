@@ -16,10 +16,10 @@ namespace ChatClient
             AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
 
             Console.WriteLine("What is your name?");
-            var myQueue = Console.ReadLine();
+            var myQueue = Console.ReadLine().ToLower();
 
             Console.WriteLine("Who do you want to talk to?");
-            var hisQueue = Console.ReadLine();
+            var hisQueue = Console.ReadLine().ToLower();
 
             var namespaceManager = NamespaceManager.Create();
             var messagingFactory = MessagingFactory.Create();
@@ -42,6 +42,7 @@ namespace ChatClient
                     {
                         //receive messages from Queue
                         message = queueReceiveClient.Receive(TimeSpan.FromHours(5));
+                        
                         if (message != null)
                         {
                             Console.WriteLine(string.Format("{0} says: {1}", hisQueue, message.GetBody<string>()));
