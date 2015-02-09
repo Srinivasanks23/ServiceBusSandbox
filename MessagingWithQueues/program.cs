@@ -22,7 +22,7 @@ namespace Microsoft.Samples.MessagingWithQueues
 
     public class program
     {
-        private static string QueueName = "SampleQueue";
+        private static string queueName = "SampleQueue";
         private static MessagingFactory messagingFactory = MessagingFactory.Create();
         const Int16 maxTrials = 4;
 
@@ -32,36 +32,53 @@ namespace Microsoft.Samples.MessagingWithQueues
 
             // Please see http://go.microsoft.com/fwlink/?LinkID=249089 for getting Service Bus connection string and adding to app.config
 
-            Console.WriteLine("Creating a Queue");
-            CreateQueue();
+            //Console.WriteLine("Creating a Queue");
+            NamespaceManager namespaceManager = CreateQueue();
             Console.WriteLine("Press anykey to start sending messages ...");
             Console.ReadKey();
             SendMessages();
             Console.WriteLine("Press anykey to start receiving messages that you just sent ...");
             Console.ReadKey();
             ReceiveMessages();
+
+            DeleteQueue(namespaceManager);
             Console.WriteLine("\nEnd of scenario, press anykey to exit.");
             Console.ReadKey();
         }
 
-        private static void CreateQueue()
+        private static NamespaceManager CreateQueue()
         {
             NamespaceManager namespaceManager = NamespaceManager.Create();
 
-            Console.WriteLine("\nCreating Queue '{0}'...", QueueName);
+            Console.WriteLine("Namespace: {0}", namespaceManager.Address);
+
+            Console.WriteLine("\nCreating Queue '{0}'...", queueName);
 
             // Delete if exists
-            if (namespaceManager.QueueExists(QueueName))
+            if (namespaceManager.QueueExists(queueName))
             {
-                namespaceManager.DeleteQueue(QueueName);
+                namespaceManager.DeleteQueue(queueName);
             }
 
-            namespaceManager.CreateQueue(QueueName);
+            namespaceManager.CreateQueue(queueName);
+
+            return namespaceManager;
+        }
+
+        private static void DeleteQueue(NamespaceManager namespaceManager)
+        {
+            Console.WriteLine("\nRemoving Queue '{0}'...", queueName);
+
+            // Delete if exists
+            if (namespaceManager.QueueExists(queueName))
+            {
+                namespaceManager.DeleteQueue(queueName);
+            }
         }
 
         private static void SendMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(QueueName);
+            var queueClient = messagingFactory.CreateQueueClient(queueName);
 
             List<BrokeredMessage> messageList = new List<BrokeredMessage>();
 
@@ -101,7 +118,7 @@ namespace Microsoft.Samples.MessagingWithQueues
 
         private static void ReceiveMessages()
         {
-            var queueClient = messagingFactory.CreateQueueClient(QueueName);
+            var queueClient = messagingFactory.CreateQueueClient(queueName);
 
             Console.WriteLine("\nReceiving message from Queue...");
             BrokeredMessage message = null;
@@ -110,7 +127,7 @@ namespace Microsoft.Samples.MessagingWithQueues
                 try
                 {
                     //receive messages from Queue
-                    message = queueClient.Receive(TimeSpan.FromSeconds(5));
+                    message = queueClient.Receive(TimeSpan.FromSeconds(1));
                     if (message != null)
                     {
                         Console.WriteLine(string.Format("Message received: Id = {0}, Body = {1}", message.MessageId, message.GetBody<Version>()));
