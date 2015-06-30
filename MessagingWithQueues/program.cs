@@ -23,11 +23,14 @@ namespace Microsoft.Samples.MessagingWithQueues
     public class program
     {
         private static string queueName = "SampleQueue";
-        private static MessagingFactory messagingFactory = MessagingFactory.Create();
+        private static MessagingFactory messagingFactory;
+        private static readonly string connectiongString = ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"];
         const Int16 maxTrials = 4;
 
         static void Main(string[] args)
         {
+
+            messagingFactory = MessagingFactory.CreateFromConnectionString(connectiongString);
             AppDomain.CurrentDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal);
 
             // Please see http://go.microsoft.com/fwlink/?LinkID=249089 for getting Service Bus connection string and adding to app.config
@@ -41,14 +44,14 @@ namespace Microsoft.Samples.MessagingWithQueues
             Console.ReadKey();
             ReceiveMessages();
 
-            DeleteQueue(namespaceManager);
+            //DeleteQueue(namespaceManager);
             Console.WriteLine("\nEnd of scenario, press anykey to exit.");
             Console.ReadKey();
         }
 
         private static NamespaceManager CreateQueue()
         {
-            NamespaceManager namespaceManager = NamespaceManager.Create();
+            NamespaceManager namespaceManager = NamespaceManager.CreateFromConnectionString(connectiongString);
 
             Console.WriteLine("Namespace: {0}", namespaceManager.Address);
 
