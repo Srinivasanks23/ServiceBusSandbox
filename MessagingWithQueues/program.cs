@@ -9,7 +9,7 @@
 // OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE. 
 //---------------------------------------------------------------------------------
 
-
+//my changes
 namespace Microsoft.Samples.MessagingWithQueues
 {
     using System;
